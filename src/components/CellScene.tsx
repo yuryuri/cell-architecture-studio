@@ -15,6 +15,7 @@ import {
   type MeshStandardMaterialParameters,
 } from "three";
 import type { CellItem, CellModelAsset, ViewMode } from "../data/cells";
+import { ErrorBoundary } from "../ErrorBoundary";
 
 type CellSceneProps = {
   cell: CellItem;
@@ -882,6 +883,26 @@ function MuscleModel({ activeOrganelle, viewMode, crossSection }: CommonModelPro
   );
 }
 
+function ProceduralModel({
+  cell,
+  activeOrganelle,
+  viewMode,
+  crossSection,
+}: CommonModelProps & { cell: CellItem }) {
+  const common = { activeOrganelle, viewMode, crossSection };
+  return (
+    <>
+      {cell.modelKind === "plant" && <PlantModel {...common} />}
+      {cell.modelKind === "whiteBlood" && <WhiteBloodModel {...common} />}
+      {cell.modelKind === "neuron" && <NeuronModel {...common} />}
+      {cell.modelKind === "epithelial" && <EpithelialModel {...common} />}
+      {cell.modelKind === "bacteria" && <BacteriaModel {...common} />}
+      {cell.modelKind === "animal" && <AnimalModel {...common} />}
+      {cell.modelKind === "muscle" && <MuscleModel {...common} />}
+    </>
+  );
+}
+
 function CellModel({
   cell,
   activeOrganelle,
@@ -902,17 +923,14 @@ function CellModel({
   return (
     <group ref={group} position={[0, 0, 0]}>
       {cell.modelAsset ? (
-        <AssetCellModel cell={cell} asset={cell.modelAsset} {...common} />
+        // If the GLB fails to load (e.g. the brain host does not serve the
+        // model file), fall back to this cell's procedural geometry instead
+        // of letting the thrown error blank the whole app.
+        <ErrorBoundary key={cell.id} fallback={<ProceduralModel cell={cell} {...common} />}>
+          <AssetCellModel cell={cell} asset={cell.modelAsset} {...common} />
+        </ErrorBoundary>
       ) : (
-        <>
-          {cell.modelKind === "plant" && <PlantModel {...common} />}
-          {cell.modelKind === "whiteBlood" && <WhiteBloodModel {...common} />}
-          {cell.modelKind === "neuron" && <NeuronModel {...common} />}
-          {cell.modelKind === "epithelial" && <EpithelialModel {...common} />}
-          {cell.modelKind === "bacteria" && <BacteriaModel {...common} />}
-          {cell.modelKind === "animal" && <AnimalModel {...common} />}
-          {cell.modelKind === "muscle" && <MuscleModel {...common} />}
-        </>
+        <ProceduralModel cell={cell} {...common} />
       )}
     </group>
   );
