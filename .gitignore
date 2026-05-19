@@ -1,0 +1,16 @@
+node_modules/
+verification/
+docs/PRD.md
+
+.DS_Store
+*.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.vercel
+
+# dist/ is intentionally NOT ignored. The built static bundle is the
+# brain-app `ui_bundle` — the install pipeline clones this repo and serves
+# dist/ directly, so it must be committed. Rebuild with `npm run build`.

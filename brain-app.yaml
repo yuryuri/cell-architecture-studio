@@ -1,0 +1,53 @@
+# Cell Architecture Studio — brain-app manifest
+#
+# An interactive 3D cell-biology gallery: selectable cell types, organelle
+# detail, comparison mode, and an AI Tutor panel. Converted from the standalone
+# Vite SPA in this repo. Installs into a brain via Settings -> Apps (paste this
+# repo's public GitHub URL -> Approve).
+#
+# Schema: registry/schema/brain/app.schema.json (in hbar.world)
+# Created: 2026-05-19
+#
+# The AI Tutor uses the `llm.complete` bridge intent: it asks the brain to
+# answer cell-biology questions on the operator's BYOK model, RAG-retrieving
+# over the brain's semantic layer. Until a brain ships `llm.complete`
+# (brainfoundry-nous cef9508, >=0.8.4), the app installs and renders but the
+# tutor returns permission_denied.
+
+dialect: brain-app/v1
+id: cell-architecture-studio
+name: Cell Architecture Studio
+version: 0.1.0
+description: Interactive 3D cell-biology gallery with selectable cell types, organelle detail, comparison mode, and an AI Tutor that answers over the brain's corpus.
+license: MIT
+
+author:
+  name: hbar
+  url: https://hbar.systems
+  contact: hello@hbar.systems
+
+repo: https://github.com/yuryuri/cell-architecture-studio
+
+tab:
+  label: Cell Studio
+  route: /cell
+  order: 40
+
+entries:
+  ui_bundle: dist/
+
+# The AI Tutor asks the brain to generate answers via the `llm.complete`
+# bridge intent. That intent RAG-retrieves over the layers declared below, so
+# tutor answers can draw on biology material the operator has ingested.
+permissions:
+  - llm.invoke
+
+requires_layers:
+  - layer: semantic
+    mode: read
+
+requires_endpoints:
+  - POST /chat/rag
+
+engines:
+  brainfoundry-nous: ">=0.8.4"
