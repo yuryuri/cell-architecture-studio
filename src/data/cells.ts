@@ -1,3 +1,19 @@
+// Assets are imported (not referenced as root-absolute URLs) so Vite hashes
+// them into dist/assets/. The brain serves dist/assets/ but not arbitrary
+// nested dirs — root-absolute /models/*.glb and /cell-renders-transparent/*.png
+// 404 inside the iframe, which used to give us missing images / a white
+// screen. Importing routes every asset through the bundle.
+import animalImg from "../assets/cell-renders/animal.png";
+import bacteriaImg from "../assets/cell-renders/bacteria.png";
+import epithelialImg from "../assets/cell-renders/epithelial.png";
+import muscleImg from "../assets/cell-renders/muscle.png";
+import neuronImg from "../assets/cell-renders/neuron.png";
+import plantImg from "../assets/cell-renders/plant.png";
+import whiteBloodImg from "../assets/cell-renders/white-blood.png";
+import animalGlb from "../assets/models/animal-cell-nih.glb?url";
+import bacteriaGlb from "../assets/models/bacteria-wall-nih.glb?url";
+import neuronGlb from "../assets/models/neuron-nih.glb?url";
+
 export type ModelKind =
   | "plant"
   | "whiteBlood"
@@ -76,7 +92,7 @@ export const cells: CellItem[] = [
     defaultOrganelle: "nucleus",
     comparison: "animal",
     renderImage: {
-      url: "/cell-renders-transparent/plant.png",
+      url: plantImg,
       aspect: "square",
     },
     occurrence: {
@@ -159,7 +175,7 @@ export const cells: CellItem[] = [
     defaultOrganelle: "lysosome",
     comparison: "epithelial",
     renderImage: {
-      url: "/cell-renders-transparent/white-blood.png",
+      url: whiteBloodImg,
       aspect: "square",
     },
     occurrence: {
@@ -228,12 +244,12 @@ export const cells: CellItem[] = [
     defaultOrganelle: "axon",
     comparison: "muscle",
     renderImage: {
-      url: "/cell-renders-transparent/neuron.png",
+      url: neuronImg,
       aspect: "wide",
     },
     modelAsset: {
-      url: "/models/neuron-nih.glb",
-      previewUrl: "/nih-previews/neuron-nih.png",
+      url: neuronGlb,
+      previewUrl: neuronImg,
       sourceLabel: "NIH 3D Neuron",
       sourceUrl: "https://3d.nih.gov/entries/3DPX-015796/2",
       scale: 3.15,
@@ -307,7 +323,7 @@ export const cells: CellItem[] = [
     defaultOrganelle: "microvilli",
     comparison: "animal",
     renderImage: {
-      url: "/cell-renders-transparent/epithelial.png",
+      url: epithelialImg,
       aspect: "square",
     },
     occurrence: {
@@ -376,12 +392,12 @@ export const cells: CellItem[] = [
     defaultOrganelle: "nucleoid",
     comparison: "animal",
     renderImage: {
-      url: "/cell-renders-transparent/bacteria.png",
+      url: bacteriaImg,
       aspect: "landscape",
     },
     modelAsset: {
-      url: "/models/bacteria-wall-nih.glb",
-      previewUrl: "/nih-previews/bacteria-wall-nih.png",
+      url: bacteriaGlb,
+      previewUrl: bacteriaImg,
       sourceLabel: "NIH 3D Gram Positive Cell Wall",
       sourceUrl: "https://3d.nih.gov/entries/3DPX-010752/2",
       scale: 0.00185,
@@ -455,12 +471,12 @@ export const cells: CellItem[] = [
     defaultOrganelle: "mitochondrion",
     comparison: "plant",
     renderImage: {
-      url: "/cell-renders-transparent/animal.png",
+      url: animalImg,
       aspect: "square",
     },
     modelAsset: {
-      url: "/models/animal-cell-nih.glb",
-      previewUrl: "/nih-previews/animal-cell-nih.png",
+      url: animalGlb,
+      previewUrl: animalImg,
       sourceLabel: "NIH 3D Animal Cell",
       sourceUrl: "https://3d.nih.gov/entries/3DPX-015797/2",
       scale: 0.044,
@@ -534,7 +550,7 @@ export const cells: CellItem[] = [
     defaultOrganelle: "myofibril",
     comparison: "neuron",
     renderImage: {
-      url: "/cell-renders-transparent/muscle.png",
+      url: muscleImg,
       aspect: "wide",
     },
     occurrence: {
@@ -593,27 +609,6 @@ export const cells: CellItem[] = [
     ],
   },
 ];
-
-// Asset paths above are authored as site-root URLs ("/models/...",
-// "/cell-renders-transparent/..."). As a brain-app this bundle is served from
-// a nested iframe path (/apps/<id>/), where root-absolute URLs 404. Rewrite
-// every asset URL against Vite's BASE_URL so the app works both standalone
-// (base "/") and embedded in a brain (base "./"). Runs once at module load.
-const assetBase = import.meta.env.BASE_URL.replace(/\/+$/, "");
-
-function resolveAssetUrl(url: string): string {
-  return url.startsWith("/") ? `${assetBase}${url}` : url;
-}
-
-for (const cell of cells) {
-  if (cell.renderImage) {
-    cell.renderImage.url = resolveAssetUrl(cell.renderImage.url);
-  }
-  if (cell.modelAsset) {
-    cell.modelAsset.url = resolveAssetUrl(cell.modelAsset.url);
-    cell.modelAsset.previewUrl = resolveAssetUrl(cell.modelAsset.previewUrl);
-  }
-}
 
 export function getCellById(id: string) {
   return cells.find((cell) => cell.id === id) ?? cells[0];
